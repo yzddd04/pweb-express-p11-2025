@@ -1,0 +1,161 @@
+### IT Literature Shop API Testing
+
+### Health Check
+GET http://localhost:8080/health
+
+### ==================== AUTHENTICATION ====================
+
+### Register User
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "username": "testuser"
+}
+
+### Login User
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Get User Profile (Replace TOKEN with actual token)
+GET http://localhost:8080/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiYmU4OTFkNi05ZmY5LTRhYTQtYTVhOC1jMjVjMDc2N2FhM2YiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjEwODc0NDIsImV4cCI6MTc2MTY5MjI0Mn0.Qayj8MfcuVHZ4lRJNxJPVsysdQeswXilSNhCWAHDoQA
+
+### ==================== GENRE MANAGEMENT ====================
+
+### Create Genre (Replace TOKEN with actual token)
+POST http://localhost:8080/genre
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiYmU4OTFkNi05ZmY5LTRhYTQtYTVhOC1jMjVjMDc2N2FhM2YiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjEwODc0NDIsImV4cCI6MTc2MTY5MjI0Mn0.Qayj8MfcuVHZ4lRJNxJPVsysdQeswXilSNhCWAHDoQA
+Content-Type: application/json
+
+{
+  "name": "Fiction"
+}
+
+### Get All Genres
+GET http://localhost:8080/genre
+
+### Get Genre Detail (Replace GENRE_ID with actual genre ID)
+GET http://localhost:8080/genre/4d649b32-6773-431c-a3e2-e0e2e24fbe0d
+
+### Update Genre (Replace TOKEN and GENRE_ID)
+PATCH http://localhost:8080/genre/4d649b32-6773-431c-a3e2-e0e2e24fbe0d
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiYmU4OTFkNi05ZmY5LTRhYTQtYTVhOC1jMjVjMDc2N2FhM2YiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjEwODc0NDIsImV4cCI6MTc2MTY5MjI0Mn0.Qayj8MfcuVHZ4lRJNxJPVsysdQeswXilSNhCWAHDoQA
+Content-Type: application/json
+
+{
+  "name": "Updated Fiction"
+}
+
+### ==================== BOOK MANAGEMENT ====================
+
+### Create Book (Replace TOKEN and GENRE_ID with actual values)
+POST http://localhost:8080/books
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiYmU4OTFkNi05ZmY5LTRhYTQtYTVhOC1jMjVjMDc2N2FhM2YiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjEwODc0NDIsImV4cCI6MTc2MTY5MjI0Mn0.Qayj8MfcuVHZ4lRJNxJPVsysdQeswXilSNhCWAHDoQA
+Content-Type: application/json
+
+{
+  "title": "The Great Book",
+  "writer": "John Doe",
+  "publisher": "Publisher Inc",
+  "publication_year": 2023,
+  "description": "A great book about programming",
+  "price": 150000,
+  "stock_quantity": 10,
+  "genre_id": "GENRE_ID"
+}
+
+### Get All Books
+GET http://localhost:8080/books
+
+### Get All Books with Pagination and Filtering
+GET http://localhost:8080/books?page=1&limit=5&search=programming&min_price=100000&max_price=200000&sort_by=price&sort_order=asc
+
+### Get Book Detail (Replace BOOK_ID with actual book ID)
+GET http://localhost:8080/books/BOOK_ID
+
+### Get Books by Genre (Replace GENRE_ID with actual genre ID)
+GET http://localhost:8080/books/genre/GENRE_ID?page=1&limit=5
+
+### Update Book (Replace TOKEN and BOOK_ID)
+PATCH http://localhost:8080/books/BOOK_ID
+Authorization: Bearer TOKEN
+Content-Type: application/json
+
+{
+  "title": "Updated Book Title",
+  "stock_quantity": 15,
+  "price": 175000
+}
+
+### Delete Book (Replace TOKEN and BOOK_ID)
+DELETE http://localhost:8080/books/BOOK_ID
+Authorization: Bearer TOKEN
+
+### ==================== TRANSACTION MANAGEMENT ====================
+
+### Create Transaction (Replace TOKEN and BOOK_IDs with actual values)
+POST http://localhost:8080/transactions
+Authorization: Bearer TOKEN
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "book_id": "BOOK_ID_1",
+      "quantity": 2
+    },
+    {
+      "book_id": "BOOK_ID_2",
+      "quantity": 1
+    }
+  ]
+}
+
+### Get All Transactions (Replace TOKEN)
+GET http://localhost:8080/transactions?page=1&limit=10
+Authorization: Bearer TOKEN
+
+### Get Transaction Detail (Replace TOKEN and TRANSACTION_ID)
+GET http://localhost:8080/transactions/TRANSACTION_ID
+Authorization: Bearer TOKEN
+
+### Get Transaction Statistics (Replace TOKEN)
+GET http://localhost:8080/transactions/statistics
+Authorization: Bearer TOKEN
+
+### ==================== ERROR TESTING ====================
+
+### Test Invalid Login
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "wrong@example.com",
+  "password": "wrongpassword"
+}
+
+### Test Unauthorized Access
+GET http://localhost:8080/auth/me
+
+### Test Invalid Book Creation
+POST http://localhost:8080/books
+Authorization: Bearer TOKEN
+Content-Type: application/json
+
+{
+  "title": "",
+  "writer": "John Doe",
+  "publisher": "Publisher Inc",
+  "publication_year": 2023,
+  "price": -100,
+  "stock_quantity": -5,
+  "genre_id": "invalid-genre-id"
+}

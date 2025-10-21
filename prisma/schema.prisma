@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id         String    @id @default(uuid()) @db.Uuid
+  username   String?   @db.Text
+  password   String    @db.Text
+  email      String    @unique @db.Text
+  created_at DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at DateTime  @updatedAt @db.Timestamptz(3)
+
+  orders orders[]
+}
+
+model orders {
+  id         String        @id @default(uuid()) @db.Uuid
+  user_id    String        @db.Uuid
+  created_at DateTime      @default(now()) @db.Timestamptz(3)
+  updated_at DateTime      @updatedAt @db.Timestamptz(3)
+
+  user         users         @relation(fields: [user_id], references: [id])
+  order_items order_items[]
+
+  @@map("orders")
+}
+
+model order_items {
+  id         String    @id @default(uuid()) @db.Uuid
+  quantity   Int
+  order_id   String    @db.Uuid
+  book_id    String    @db.Uuid
+  created_at DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at DateTime  @updatedAt @db.Timestamptz(3)
+
+  order orders @relation(fields: [order_id], references: [id])
+  book  books  @relation(fields: [book_id], references: [id])
+
+  @@map("order_items")
+}
+
+model genres {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique @db.Text
+  created_at  DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at  DateTime  @updatedAt @db.Timestamptz(3)
+  deleted_at  DateTime? @db.Timestamptz(3)
+
+  books books[]
+
+  @@map("genres")
+}
+
+model books {
+  id               String    @id @default(uuid()) @db.Uuid
+  title            String    @unique @db.Text
+  writer           String    @db.Text
+  publisher        String    @db.Text
+  publication_year Int
+  description      String?   @db.Text
+  price            Float     @db.DoublePrecision
+  stock_quantity   Int
+  genre_id         String    @db.Uuid
+  created_at       DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(3)
+  deleted_at       DateTime? @db.Timestamptz(3)
+
+  genre       genres        @relation(fields: [genre_id], references: [id])
+  order_items order_items[]
+
+  @@map("books")
+}
