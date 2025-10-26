@@ -241,8 +241,10 @@ Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collectio
 #### 🧩 Module 1: Authentication
 1. **Register** → Create new user with valid email 
 ![Register Success](public/auth/1_register(success).png)
-2. **Register (duplicate)** → Test duplicate email error ![Register Duplicate](public/auth/2_register_(sameAccount).png)
-3. **Login** → Get access token ![Login Success](public/auth/3_login.png)
+2. **Register (duplicate)** → Test duplicate email error 
+![Register Duplicate](public/auth/2_register_(sameAccount).png)
+3. **Login** → Get access token 
+![alt image](public/auth/3_login.png)
 4. **Login (error)** → Test with wrong password ![Login Error](public/auth/4_login(incorrectPassword).png)
 5. **Get Me** → Get user profile with valid token ![Get Me Valid Token](public/auth/5_getMe(validToken).png)
 6. **Get Me (error)** → Test with invalid token ![Get Me Invalid Token](public/auth/6_getMe(invalidToken).png)
