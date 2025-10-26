@@ -188,544 +188,46 @@ Semua response mengikuti format konsisten:
 }
 ```
 
-## 🔐 Authentication Endpoints
-
-### POST /auth/register
-Mendaftarkan user baru.
-
-**Request Body:**
-```json
-{
-  "username": "Mr. Dummy", // Optional
-  "email": "dummy@gmail.com",
-  "password": "Dummy.12345"
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "message": "User registered successfully",
-  "data": {
-    "id": "7d25ce36-54af-448c-8a15-f487764c8d83",
-    "email": "dummy@gmail.com",
-    "created_at": "2025-07-20T00:24:16.113Z"
-  }
-}
-```
-
-### POST /auth/login
-Login user dan mendapatkan access token.
-
-**Request Body:**
-```json
-{
-  "email": "dummy@gmail.com",
-  "password": "Dummy.12345"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Login successfully",
-  "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
-```
-
-### GET /auth/me
-Mendapatkan profil user yang sedang login.
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get me successfully",
-  "data": {
-    "id": "7d25ce36-54af-448c-8a15-f487764c8d83",
-    "username": "Mr. Dummy",
-    "email": "dummy@gmail.com"
-  }
-}
-```
-
-## 🏷️ Genre Endpoints
-
-### POST /genre
-Membuat genre baru. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Request Body:**
-```json
-{
-  "name": "Dummy Genre"
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "message": "Genre created successfully",
-  "data": {
-    "id": "7e7dfc47-f841-4294-ab9f-297696eb126a",
-    "name": "Dummy Genre",
-    "created_at": "2025-09-05T23:16:33.861Z"
-  }
-}
-```
-
-### GET /genre
-Mendapatkan daftar genre dengan pagination dan filtering.
-
-**Query Parameters:**
-- `page` (optional): Halaman (default: 1)
-- `limit` (optional): Jumlah item per halaman (default: 10)
-- `search` (optional): Pencarian berdasarkan nama genre
-- `orderByName` (optional): Sorting berdasarkan nama (asc/desc)
-
-**Example:**
-```
-GET /genre?page=1&limit=10&search=dummy&orderByName=asc
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get all genre successfully",
-  "data": [
-    {
-      "id": "766d3966-d294-4c09-89fe-fbf70320d4f1",
-      "name": "Dummy Genre 1"
-    },
-    {
-      "id": "46d0eafa-8f94-4214-84bf-362fe5bb081f",
-      "name": "Dummy Genre 2"
-    }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "prev_page": null,
-    "next_page": 2
-  }
-}
-```
-
-### GET /genre/:genre_id
-Mendapatkan detail genre berdasarkan ID.
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get genre detail successfully",
-  "data": {
-    "id": "38af5ceb-755f-4ff6-9f08-856fbdd46406",
-    "name": "Dummy Genre 10"
-  }
-}
-```
-
-### PATCH /genre/:genre_id
-Mengupdate genre. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Request Body:**
-```json
-{
-  "name": "Dummy Genre 10 Kocak"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Genre updated successfully",
-  "data": {
-    "id": "38af5ceb-755f-4ff6-9f08-856fbdd46406",
-    "name": "Dummy Genre 10 Kocak",
-    "updated_at": "2024-10-17T20:43:48.267Z"
-  }
-}
-```
-
-### DELETE /genre/:genre_id
-Menghapus genre (soft delete). **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Genre removed successfully"
-}
-```
-
-## 📖 Book Endpoints
-
-### POST /books
-Membuat buku baru. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Request Body:**
-```json
-{
-  "title": "Dummy Book",
-  "writer": "Dummy Writer",
-  "publisher": "Dummy Publisher",
-  "description": "Dummy Description", // Optional
-  "publication_year": 2025,
-  "price": 50000,
-  "stock_quantity": 50,
-  "genre_id": "c34b1576-9613-4461-84e1-cbeea61df1db"
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "message": "Book added successfully",
-  "data": {
-    "id": "89161fbb-1ca5-48d6-a20d-933cc0d3e96f",
-    "title": "Dummy Book",
-    "created_at": "2024-12-15T23:20:14.791Z"
-  }
-}
-```
-
-### GET /books
-Mendapatkan daftar buku dengan pagination dan filtering.
-
-**Query Parameters:**
-- `page` (optional): Halaman (default: 1)
-- `limit` (optional): Jumlah item per halaman (default: 10)
-- `search` (optional): Pencarian berdasarkan title, writer, atau publisher
-- `orderByTitle` (optional): Sorting berdasarkan title (asc/desc)
-- `orderByPublishDate` (optional): Sorting berdasarkan publication_year (asc/desc)
-- `condition` (optional): Filter berdasarkan kondisi (NEW, LIKE_NEW, VERY_GOOD, GOOD, ACCEPTABLE, POOR)
-
-**Example:**
-```
-GET /books?page=1&limit=5&search=dummy&orderByTitle=desc&orderByPublishDate=asc&condition=NEW
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get all book successfully",
-  "data": [
-    {
-      "id": "8dfb55aa-18e4-470a-8416-9b405db879b8",
-      "title": "Dummy Book 1",
-      "writer": "Dummy Writer 1",
-      "publisher": "Dummy Publisher 1",
-      "description": "Dummy Description 1",
-      "publication_year": 2025,
-      "price": 50000,
-      "stock_quantity": 50,
-      "genre": "Dummy Genre 5"
-    }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 5,
-    "prev_page": null,
-    "next_page": 2
-  }
-}
-```
-
-### GET /books/:book_id
-Mendapatkan detail buku berdasarkan ID.
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get book detail successfully",
-  "data": {
-    "id": "923bf4d7-7c64-490e-b5ee-f752087fc492",
-    "title": "Dummy Book 5",
-    "writer": "Dummy Writer 5",
-    "publisher": "Dummy Publisher 5",
-    "description": "Dummy Description 5",
-    "publication_year": 2025,
-    "price": 50000,
-    "stock_quantity": 50,
-    "genre": "Dummy Genre 2"
-  }
-}
-```
-
-### GET /books/genre/:genre_id
-Mendapatkan daftar buku berdasarkan genre.
-
-**Query Parameters:**
-- `page` (optional): Halaman (default: 1)
-- `limit` (optional): Jumlah item per halaman (default: 10)
-- `search` (optional): Pencarian
-- `orderByTitle` (optional): Sorting berdasarkan title (asc/desc)
-- `orderByPublishDate` (optional): Sorting berdasarkan publication_year (asc/desc)
-- `condition` (optional): Filter berdasarkan kondisi
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get all book by genre successfully",
-  "data": [
-    {
-      "id": "2253d5bb-4c4c-4cf7-a2b9-4a5888e5f4d5",
-      "title": "Dummy Book 13",
-      "writer": "Dummy Writer 13",
-      "publisher": "Dummy Publisher 13",
-      "description": "Dummy Description 13",
-      "genre": "Dummy Genre 2",
-      "publication_year": 2025,
-      "price": 50000,
-      "stock_quantity": 50
-    }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 5,
-    "prev_page": null,
-    "next_page": 2
-  }
-}
-```
-
-### PATCH /books/:book_id
-Mengupdate buku. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Request Body:**
-```json
-{
-  "description": "Dummy Description",
-  "price": 50000
-  // "stock_quantity": 50, // Optional
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Book updated successfully",
-  "data": {
-    "id": "6664cfda-aa6e-4a3d-8244-ef42e779f179",
-    "title": "Dummy Book",
-    "updated_at": "2024-10-17T20:43:48.267Z"
-  }
-}
-```
-
-### DELETE /books/:book_id
-Menghapus buku (soft delete). **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Book removed successfully"
-}
-```
-
-## 🛒 Transaction Endpoints
-
-### POST /transactions
-Membuat transaksi baru. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Request Body:**
-```json
-{
-  "user_id": "7d25ce36-54af-448c-8a15-f487764c8d83",
-  "items": [
-    {
-      "book_id": "2253d5bb-4c4c-4cf7-a2b9-4a5888e5f4d5",
-      "quantity": 10
-    },
-    {
-      "book_id": "8dfb55aa-18e4-470a-8416-9b405db879b8",
-      "quantity": 3
-    },
-    {
-      "book_id": "1a1399c1-5c76-4ce3-b3d9-b824a47a3832",
-      "quantity": 5
-    },
-    {
-      "book_id": "923bf4d7-7c64-490e-b5ee-f752087fc492",
-      "quantity": 7
-    }
-  ]
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "message": "Transaction created successfully",
-  "data": {
-    "transaction_id": "c3353007-bbb7-47d0-83f7-7665ca7c8699",
-    "total_quantity": 25,
-    "total_price": 999000
-  }
-}
-```
-
-### GET /transactions
-Mendapatkan daftar transaksi user. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Query Parameters:**
-- `page` (optional): Halaman (default: 1)
-- `limit` (optional): Jumlah item per halaman (default: 10)
-- `search` (optional): Pencarian berdasarkan ID transaksi
-- `orderById` (optional): Sorting berdasarkan ID (asc/desc)
-- `orderByAmount` (optional): Sorting berdasarkan total amount (asc/desc)
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get all transaction successfully",
-  "data": [
-    {
-      "id": "e4f8d1c9-5a0b-4e72-a3f7-9c8b6d2a4e1f",
-      "total_quantity": 15,
-      "total_price": 45000
-    },
-    {
-      "id": "0c9d8e7b-6a5f-4d32-8b1a-2c3d4e5f6a7b",
-      "total_quantity": 20,
-      "total_price": 50000
-    }
-  ]
-}
-```
-
-### GET /transactions/:transaction_id
-Mendapatkan detail transaksi. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get transaction detail successfully",
-  "data": {
-    "id": "e4f8d1c9-5a0b-4e72-a3f7-9c8b6d2a4e1f",
-    "items": [
-      {
-        "book_id": "b3e0a5f6-7d1c-4b88-9e52-1f4a3c6d9b0e",
-        "book_title": "Dummy Book 7",
-        "quantity": 5,
-        "subtotal_price": 15000
-      },
-      {
-        "book_id": "a1c2b3d4-e5f6-4789-8012-34567890abcd",
-        "book_title": "Dummy Book 2",
-        "quantity": 5,
-        "subtotal_price": 15000
-      }
-    ],
-    "total_quantity": 15,
-    "total_price": 45000
-  }
-}
-```
-
-### GET /transactions/statistics
-Mendapatkan statistik transaksi. **Requires Authentication**
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Get transactions statistics successfully",
-  "data": {
-    "total_transactions": 1000,
-    "average_transaction_amount": 50000,
-    "fewest_book_sales_genre": "Science Fiction",
-    "most_book_sales_genre": "Fantasy"
-  }
-}
-```
-
-## 🏥 Health Check
-
-### GET /health-check
-Mengecek status API.
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Hello World!",
-  "date": "Wed Oct 22 2025"
-}
-```
+### Postman Collection
+Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collection.json` ke Postman untuk testing lengkap.
+
+## 📝 Endpoints Summary
+
+### Authentication (`/auth`)
+- `POST /auth/register` - Register user baru
+- `POST /auth/login` - Login user dan mendapatkan JWT token
+- `GET /auth/me` - Mendapatkan profil user yang sedang login
+
+### Genre (`/genre`)
+- `POST /genre` - Membuat genre baru (Requires Auth)
+- `GET /genre` - Mendapatkan daftar genre dengan pagination
+- `GET /genre/:id` - Mendapatkan detail genre
+- `PATCH /genre/:id` - Mengupdate genre (Requires Auth)
+- `DELETE /genre/:id` - Menghapus genre soft delete (Requires Auth)
+
+### Books (`/books`)
+- `POST /books` - Membuat buku baru (Requires Auth)
+- `GET /books` - Mendapatkan daftar buku dengan filtering & sorting
+- `GET /books/:id` - Mendapatkan detail buku
+- `GET /books/genre/:genre_id` - Mendapatkan buku berdasarkan genre
+- `PATCH /books/:id` - Mengupdate buku (Requires Auth)
+- `DELETE /books/:id` - Menghapus buku soft delete (Requires Auth)
+
+### Transactions (`/transactions`)
+- `POST /transactions` - Membuat transaksi baru (Requires Auth)
+- `GET /transactions` - Mendapatkan daftar transaksi user
+- `GET /transactions/:id` - Mendapatkan detail transaksi
+- `GET /transactions/statistics` - Mendapatkan statistik transaksi (Requires Auth)
+
+### Health Check
+- `GET /health-check` - Mengecek status API
+
+> 📚 **Dokumentasi lengkap**: Import Postman collection `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collection.json` untuk detail lengkap semua endpoints dengan request/response examples.
 
 ## 🧪 Testing
+
+### Testing Documentation
+Untuk dokumentasi testing lengkap dengan screenshot, lihat file [TESTING_DOCUMENTATION.md](./TESTING_DOCUMENTATION.md)
 
 ### Postman Collection
 Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collection.json` ke Postman untuk testing lengkap.
@@ -739,9 +241,74 @@ Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collectio
 ```
 
 ### Testing Workflow
-1. **Health Check** → **Register** → **Login** → **Set BEARER_TOKEN**
-2. **Create Genre** → **Create Book** → **Create Transaction**
-3. **Test all endpoints** dengan token yang valid
+
+#### 🧩 Module 1: Authentication
+1. **Register** → Create new user with valid email
+2. **Register (duplicate)** → Test duplicate email error
+3. **Login** → Get access token
+4. **Login (error)** → Test with wrong password
+5. **Get Me** → Get user profile with valid token
+6. **Get Me (error)** → Test with invalid token
+
+#### 🏷️ Module 2: Genre
+1. **Create Genre** → Create 2 new genres (Fiction, History)
+2. **Create Genre (duplicate)** → Test duplicate name error
+3. **Delete Genre** → Soft delete genre
+
+#### 📖 Module 3: Books
+1. **Create Book (validation error)** → Test negative price and invalid year
+2. **Create Book** → Add 3 books with valid data
+3. **Get Books (sorting)** → Test ASC and DESC sorting
+4. **Delete Book** → Soft delete book
+5. **Delete Book (error)** → Test delete already deleted book
+
+#### 💳 Module 4: Transactions
+1. **Create Transaction (error)** → Test insufficient stock with atomicity
+2. **Create Transaction** → Create successful transaction with 3 books
+3. **Get Statistics** → Get transaction statistics with fewest and most sales genre
+
+#### ❤️ Module 5: Health Check
+1. **Health Check** → Test API status
+
+### Test Cases Summary
+- **Total Test Cases**: 19 test cases
+- **Success Cases**: 14 cases
+- **Error Cases**: 5 cases
+
+### Screenshots
+
+#### 🧩 Authentication
+![Register Success](public/auth/1_register(success).png)
+![Register Duplicate](public/auth/2_register_(sameAccount).png)
+![Login Success](public/auth/3_login.png)
+![Login Error](public/auth/4_login(incorrectPassword).png)
+![Get Me Valid Token](public/auth/5_getMe(validToken).png)
+![Get Me Invalid Token](public/auth/6_getMe(invalidToken).png)
+
+#### 🏷️ Genre
+![Create Fiction Genre](public/genre/1_newGenre(fiction).png)
+![Create History Genre](public/genre/1_newGenre(history).png)
+![Create Duplicate Genre](public/genre/2_newGenre(alreadyExist).png)
+![Delete Genre](public/genre/3_deleteGenre(fiction).png)
+
+#### 📖 Books
+![Book Validation Error - Negative Price](public/book/1_postBooks(negativePrice).png)
+![Book Validation Error - Year Over 2025](public/book/1_postBooks(over2025).png)
+![Add Books 1](public/book/2_addBooks_1.png)
+![Add Books 2](public/book/2_addBooks_2.png)
+![Add Books 3](public/book/2_addBooks_3.png)
+![Sort Books ASC](public/book/3_sortBooks(asc).png)
+![Sort Books DESC](public/book/3_sortBooks(desc).png)
+![Delete Book Success](public/book/4_deleteBooks(success).png)
+![Delete Book Error](public/book/5_deleteBooks(sameId).png)
+
+#### 💳 Transactions
+![Transaction Insufficient Stock](public/transaction/1_createTransaction(not-enouch-stock_ atomicity).png)
+![Transaction Success](public/transaction/2_createTransaction(success).png)
+![Transaction Statistics](public/transaction/3_transactionStatistics(most&fewest).png)
+
+#### ❤️ Health Check
+![Health Check](public/health-check/1_health-check.png)
 
 ## 📊 Error Handling
 

@@ -11,35 +11,29 @@ router.post('/', authenticateToken, validateTransaction, async (req: any, res) =
     const { items } = req.body;
     const userId = req.user.id;
 
-    // Validate all books exist and have sufficient stock
-    const bookIds = items.map((item: { book_id: string; quantity: number }) => item.book_id);
-    const books = await prisma.books.findMany({
-      where: {
-        id: { in: bookIds },
-        deleted_at: null
-      }
-    });
-
-    if (books.length !== bookIds.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'One or more books not found'
-      });
-    }
-
-    // Check stock availability
-    for (const item of items) {
-      const book = books.find((b: any) => b.id === item.book_id);
-      if (!book || book.stock_quantity < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for book: ${book?.title}. Available: ${book?.stock_quantity}, Requested: ${item.quantity}`
-        });
-      }
-    }
-
-    // Create transaction using Prisma transaction
+    // Create transaction using Prisma transaction with atomic operations
     const result = await prisma.$transaction(async (tx: any) => {
+      // Validate all books exist and check stock within transaction
+      const bookIds = items.map((item: { book_id: string; quantity: number }) => item.book_id);
+      const books = await tx.books.findMany({
+        where: {
+          id: { in: bookIds },
+          deleted_at: null
+        }
+      });
+
+      if (books.length !== bookIds.length) {
+        throw new Error('One or more books not found');
+      }
+
+      // Check stock availability within transaction
+      for (const item of items) {
+        const book = books.find((b: any) => b.id === item.book_id);
+        if (!book || book.stock_quantity < item.quantity) {
+          throw new Error(`Insufficient stock for book: ${book?.title}. Available: ${book?.stock_quantity}, Requested: ${item.quantity}`);
+        }
+      }
+
       // Create order
       const order = await tx.orders.create({
         data: {
@@ -103,8 +97,24 @@ router.post('/', authenticateToken, validateTransaction, async (req: any, res) =
         total_price: result.totalAmount
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create transaction error:', error);
+    
+    // Check for specific error types
+    if (error.message && error.message.includes('Insufficient stock')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+    
+    if (error.message && error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create transaction'
@@ -142,7 +152,7 @@ router.get('/statistics', authenticateToken, async (req: any, res) => {
     // Calculate statistics
     const totalTransactions = transactions.length;
     let totalAmount = 0;
-    const genreStats: { [key: string]: { name: string; count: number; amount: number } } = {};
+    const genreStats: { [key: string]: { name: string; quantity: number; amount: number } } = {};
 
     transactions.forEach((transaction: any) => {
       transaction.order_items.forEach((item: any) => {
@@ -153,25 +163,31 @@ router.get('/statistics', authenticateToken, async (req: any, res) => {
         if (!genreStats[genreName]) {
           genreStats[genreName] = {
             name: genreName,
-            count: 0,
+            quantity: 0,
             amount: 0
           };
         }
-        genreStats[genreName].count += 1;
+        // Count actual quantity sold, not number of items
+        genreStats[genreName].quantity += item.quantity;
         genreStats[genreName].amount += itemTotal;
       });
     });
 
     const averageTransaction = totalTransactions > 0 ? totalAmount / totalTransactions : 0;
 
-    // Find genre with most and least transactions
+    // Find genre with most and least book sales (by quantity)
     const genreArray = Object.values(genreStats);
-    const genreWithMostTransactions = genreArray.length > 0 
-      ? genreArray.reduce((max, genre) => genre.count > max.count ? genre : max)
-      : null;
-    const genreWithLeastTransactions = genreArray.length > 0 
-      ? genreArray.reduce((min, genre) => genre.count < min.count ? genre : min)
-      : null;
+    
+    // Sort by quantity to find most and least
+    const sortedGenres = genreArray.sort((a, b) => a.quantity - b.quantity);
+    
+    const genreWithLeastSales = sortedGenres.length > 0 
+      ? sortedGenres[0].name 
+      : 'N/A';
+    
+    const genreWithMostSales = sortedGenres.length > 0 
+      ? sortedGenres[sortedGenres.length - 1].name 
+      : 'N/A';
 
     res.json({
       success: true,
@@ -179,8 +195,8 @@ router.get('/statistics', authenticateToken, async (req: any, res) => {
       data: {
         total_transactions: totalTransactions,
         average_transaction_amount: Math.round(averageTransaction * 100) / 100,
-        fewest_book_sales_genre: genreWithLeastTransactions?.name || 'N/A',
-        most_book_sales_genre: genreWithMostTransactions?.name || 'N/A'
+        fewest_book_sales_genre: genreWithLeastSales,
+        most_book_sales_genre: genreWithMostSales
       }
     });
   } catch (error) {

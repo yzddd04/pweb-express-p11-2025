@@ -83,8 +83,9 @@ router.get('/', async (req, res) => {
     const genre_id = req.query.genre_id as string;
     const min_price = parseFloat(req.query.min_price as string);
     const max_price = parseFloat(req.query.max_price as string);
-    const sort_by = req.query.sort_by as string || 'created_at';
-    const sort_order = req.query.sort_order as string || 'desc';
+    const orderByTitle = req.query.orderByTitle as string;
+    const orderByPublishDate = req.query.orderByPublishDate as string;
+    const condition = req.query.condition as string;
 
     const skip = (page - 1) * limit;
 
@@ -113,9 +114,17 @@ router.get('/', async (req, res) => {
       where.price = { ...where.price, lte: max_price };
     }
 
-    // Build order by clause
+    // Build order by clause based on Postman collection parameters
     const orderBy: any = {};
-    orderBy[sort_by] = sort_order;
+    
+    // Priority: orderByTitle > orderByPublishDate > default (created_at)
+    if (orderByTitle && (orderByTitle === 'asc' || orderByTitle === 'desc')) {
+      orderBy.title = orderByTitle;
+    } else if (orderByPublishDate && (orderByPublishDate === 'asc' || orderByPublishDate === 'desc')) {
+      orderBy.publication_year = orderByPublishDate;
+    } else {
+      orderBy.created_at = 'desc'; // Default sorting
+    }
 
     // Get books with pagination
     const [books, total] = await Promise.all([
@@ -226,8 +235,9 @@ router.get('/genre/:genre_id', async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
-    const sort_by = req.query.sort_by as string || 'created_at';
-    const sort_order = req.query.sort_order as string || 'desc';
+    const orderByTitle = req.query.orderByTitle as string;
+    const orderByPublishDate = req.query.orderByPublishDate as string;
+    const condition = req.query.condition as string;
 
     const skip = (page - 1) * limit;
 
@@ -257,9 +267,17 @@ router.get('/genre/:genre_id', async (req, res) => {
       ];
     }
 
-    // Build order by clause
+    // Build order by clause based on Postman collection parameters
     const orderBy: any = {};
-    orderBy[sort_by] = sort_order;
+    
+    // Priority: orderByTitle > orderByPublishDate > default (created_at)
+    if (orderByTitle && (orderByTitle === 'asc' || orderByTitle === 'desc')) {
+      orderBy.title = orderByTitle;
+    } else if (orderByPublishDate && (orderByPublishDate === 'asc' || orderByPublishDate === 'desc')) {
+      orderBy.publication_year = orderByPublishDate;
+    } else {
+      orderBy.created_at = 'desc'; // Default sorting
+    }
 
     // Get books with pagination
     const [books, total] = await Promise.all([
