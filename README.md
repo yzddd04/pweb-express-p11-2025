@@ -222,12 +222,8 @@ Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collectio
 ### Health Check
 - `GET /health-check` - Mengecek status API
 
-> 📚 **Dokumentasi lengkap**: Import Postman collection `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collection.json` untuk detail lengkap semua endpoints dengan request/response examples.
 
-## 🧪 Testing
 
-### Testing Documentation
-Untuk dokumentasi testing lengkap dengan screenshot, lihat file [TESTING_DOCUMENTATION.md](./TESTING_DOCUMENTATION.md)
 
 ### Postman Collection
 Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collection.json` ke Postman untuk testing lengkap.
@@ -243,72 +239,45 @@ Import file `Dokumentasi API Praktikum Pemrograman Web Modul 3.postman_collectio
 ### Testing Workflow
 
 #### 🧩 Module 1: Authentication
-1. **Register** → Create new user with valid email
-2. **Register (duplicate)** → Test duplicate email error
-3. **Login** → Get access token
-4. **Login (error)** → Test with wrong password
-5. **Get Me** → Get user profile with valid token
-6. **Get Me (error)** → Test with invalid token
+1. **Register** → Create new user with valid email 
+![Register Success](public/auth/1_register(success).png)
+2. **Register (duplicate)** → Test duplicate email error ![Register Duplicate](public/auth/2_register_(sameAccount).png)
+3. **Login** → Get access token ![Login Success](public/auth/3_login.png)
+4. **Login (error)** → Test with wrong password ![Login Error](public/auth/4_login(incorrectPassword).png)
+5. **Get Me** → Get user profile with valid token ![Get Me Valid Token](public/auth/5_getMe(validToken).png)
+6. **Get Me (error)** → Test with invalid token ![Get Me Invalid Token](public/auth/6_getMe(invalidToken).png)
 
 #### 🏷️ Module 2: Genre
-1. **Create Genre** → Create 2 new genres (Fiction, History)
-2. **Create Genre (duplicate)** → Test duplicate name error
-3. **Delete Genre** → Soft delete genre
+1. **Create Genre (Fiction)** → Create Fiction genre ![Create Fiction Genre](public/genre/1_newGenre(fiction).png)
+2. **Create Genre (History)** → Create History genre ![Create History Genre](public/genre/1_newGenre(history).png)
+3. **Create Genre (duplicate)** → Test duplicate name error ![Create Duplicate Genre](public/genre/2_newGenre(alreadyExist).png)
+4. **Delete Genre** → Soft delete genre ![Delete Genre](public/genre/3_deleteGenre(fiction).png)
 
 #### 📖 Module 3: Books
-1. **Create Book (validation error)** → Test negative price and invalid year
-2. **Create Book** → Add 3 books with valid data
-3. **Get Books (sorting)** → Test ASC and DESC sorting
-4. **Delete Book** → Soft delete book
-5. **Delete Book (error)** → Test delete already deleted book
+1. **Create Book (validation error - negative price)** → Test negative price ![Book Validation Error - Negative Price](public/book/1_postBooks(negativePrice).png)
+2. **Create Book (validation error - year > 2025)** → Test invalid year ![Book Validation Error - Year Over 2025](public/book/1_postBooks(over2025).png)
+3. **Add Book 1** → Add first book with valid data ![Add Book 1](public/book/2_addBooks_1.png)
+4. **Add Book 2** → Add second book with valid data ![Add Book 2](public/book/2_addBooks_2.png)
+5. **Add Book 3** → Add third book with valid data ![Add Book 3](public/book/2_addBooks_3.png)
+6. **Get Books (sorting ASC)** → Test ascending sort ![Sort Books ASC](public/book/3_sortBooks(asc).png)
+7. **Get Books (sorting DESC)** → Test descending sort ![Sort Books DESC](public/book/3_sortBooks(desc).png)
+8. **Delete Book** → Soft delete book ![Delete Book Success](public/book/4_deleteBooks(success).png)
+9. **Delete Book (error)** → Test delete already deleted book ![Delete Book Error](public/book/5_deleteBooks(sameId).png)
 
 #### 💳 Module 4: Transactions
-1. **Create Transaction (error)** → Test insufficient stock with atomicity
-2. **Create Transaction** → Create successful transaction with 3 books
-3. **Get Statistics** → Get transaction statistics with fewest and most sales genre
+1. **Create Transaction (error)** → Test insufficient stock with atomicity ![Transaction Insufficient Stock](public/transaction/1_createTransaction(not-enouch-stock_ atomicity).png)
+2. **Create Transaction** → Create successful transaction with 3 books ![Transaction Success](public/transaction/2_createTransaction(success).png)
+3. **Get Statistics** → Get transaction statistics with fewest and most sales genre ![Transaction Statistics](public/transaction/3_transactionStatistics(most&fewest).png)
 
 #### ❤️ Module 5: Health Check
-1. **Health Check** → Test API status
+1. **Health Check** → Test API status ![Health Check](public/health-check/1_health-check.png)
 
 ### Test Cases Summary
 - **Total Test Cases**: 19 test cases
 - **Success Cases**: 14 cases
 - **Error Cases**: 5 cases
 
-### Screenshots
-
-#### 🧩 Authentication
-![Register Success](public/auth/1_register(success).png)
-![Register Duplicate](public/auth/2_register_(sameAccount).png)
-![Login Success](public/auth/3_login.png)
-![Login Error](public/auth/4_login(incorrectPassword).png)
-![Get Me Valid Token](public/auth/5_getMe(validToken).png)
-![Get Me Invalid Token](public/auth/6_getMe(invalidToken).png)
-
-#### 🏷️ Genre
-![Create Fiction Genre](public/genre/1_newGenre(fiction).png)
-![Create History Genre](public/genre/1_newGenre(history).png)
-![Create Duplicate Genre](public/genre/2_newGenre(alreadyExist).png)
-![Delete Genre](public/genre/3_deleteGenre(fiction).png)
-
-#### 📖 Books
-![Book Validation Error - Negative Price](public/book/1_postBooks(negativePrice).png)
-![Book Validation Error - Year Over 2025](public/book/1_postBooks(over2025).png)
-![Add Books 1](public/book/2_addBooks_1.png)
-![Add Books 2](public/book/2_addBooks_2.png)
-![Add Books 3](public/book/2_addBooks_3.png)
-![Sort Books ASC](public/book/3_sortBooks(asc).png)
-![Sort Books DESC](public/book/3_sortBooks(desc).png)
-![Delete Book Success](public/book/4_deleteBooks(success).png)
-![Delete Book Error](public/book/5_deleteBooks(sameId).png)
-
-#### 💳 Transactions
-![Transaction Insufficient Stock](public/transaction/1_createTransaction(not-enouch-stock_ atomicity).png)
-![Transaction Success](public/transaction/2_createTransaction(success).png)
-![Transaction Statistics](public/transaction/3_transactionStatistics(most&fewest).png)
-
-#### ❤️ Health Check
-![Health Check](public/health-check/1_health-check.png)
+> 📸 **Screenshots**: Semua screenshot testing tersedia di folder `public/` dan ditampilkan di workflow di atas.
 
 ## 📊 Error Handling
 
