@@ -1,0 +1,40 @@
+### Test Transaction Statistics Endpoint
+### Base URL: http://localhost:8080
+
+### Health Check
+GET http://localhost:8080/health-check
+
+### Register User
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "Test User",
+  "email": "test@example.com",
+  "password": "Test123456"
+}
+
+### Login User
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123456"
+}
+
+### Test Transaction Statistics (Replace YOUR_ACCESS_TOKEN_HERE with actual token)
+GET http://localhost:8080/transactions/statistics
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+### Expected Response:
+### {
+###   "success": true,
+###   "message": "Get transactions statistics successfully",
+###   "data": {
+###     "total_transactions": 0,
+###     "average_transaction_amount": 0,
+###     "fewest_book_sales_genre": "N/A",
+###     "most_book_sales_genre": "N/A"
+###   }
+### }

@@ -53,8 +53,9 @@ router.post('/register', validateRegister, async (req, res) => {
       success: true,
       message: 'User registered successfully',
       data: {
-        user,
-        token
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at
       }
     });
   } catch (error) {
@@ -101,15 +102,9 @@ router.post('/login', validateLogin, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Login successful',
+      message: 'Login successfully',
       data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          created_at: user.created_at
-        },
-        token
+        access_token: token
       }
     });
   } catch (error) {
@@ -144,8 +139,12 @@ router.get('/me', authenticateToken, async (req: any, res) => {
 
     res.json({
       success: true,
-      message: 'User profile retrieved successfully',
-      data: { user }
+      message: 'Get me successfully',
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
     });
   } catch (error) {
     console.error('Get me error:', error);

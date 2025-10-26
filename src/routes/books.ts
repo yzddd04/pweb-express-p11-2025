@@ -58,8 +58,12 @@ router.post('/', authenticateToken, validateBook, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Book created successfully',
-      data: { book }
+      message: 'Book added successfully',
+      data: {
+        id: book.id,
+        title: book.title,
+        created_at: book.created_at
+      }
     });
   } catch (error) {
     console.error('Create book error:', error);
@@ -136,17 +140,23 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Books retrieved successfully',
-      data: {
-        books,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
+      message: 'Get all book successfully',
+      data: books.map(book => ({
+        id: book.id,
+        title: book.title,
+        writer: book.writer,
+        publisher: book.publisher,
+        description: book.description,
+        publication_year: book.publication_year,
+        price: book.price,
+        stock_quantity: book.stock_quantity,
+        genre: book.genre.name
+      })),
+      meta: {
+        page,
+        limit,
+        prev_page: page > 1 ? page - 1 : null,
+        next_page: page < totalPages ? page + 1 : null
       }
     });
   } catch (error) {
@@ -187,8 +197,18 @@ router.get('/:book_id', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Book detail retrieved successfully',
-      data: { book }
+      message: 'Get book detail successfully',
+      data: {
+        id: book.id,
+        title: book.title,
+        writer: book.writer,
+        publisher: book.publisher,
+        description: book.description,
+        publication_year: book.publication_year,
+        price: book.price,
+        stock_quantity: book.stock_quantity,
+        genre: book.genre.name
+      }
     });
   } catch (error) {
     console.error('Get book detail error:', error);
@@ -264,21 +284,23 @@ router.get('/genre/:genre_id', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Books by genre retrieved successfully',
-      data: {
-        genre: {
-          id: genre.id,
-          name: genre.name
-        },
-        books,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
+      message: 'Get all book by genre successfully',
+      data: books.map(book => ({
+        id: book.id,
+        title: book.title,
+        writer: book.writer,
+        publisher: book.publisher,
+        description: book.description,
+        genre: book.genre.name,
+        publication_year: book.publication_year,
+        price: book.price,
+        stock_quantity: book.stock_quantity
+      })),
+      meta: {
+        page,
+        limit,
+        prev_page: page > 1 ? page - 1 : null,
+        next_page: page < totalPages ? page + 1 : null
       }
     });
   } catch (error) {
@@ -356,7 +378,11 @@ router.patch('/:book_id', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       message: 'Book updated successfully',
-      data: { book }
+      data: {
+        id: book.id,
+        title: book.title,
+        updated_at: book.updated_at
+      }
     });
   } catch (error) {
     console.error('Update book error:', error);
@@ -395,7 +421,7 @@ router.delete('/:book_id', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Book deleted successfully'
+      message: 'Book removed successfully'
     });
   } catch (error) {
     console.error('Delete book error:', error);

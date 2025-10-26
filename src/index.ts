@@ -21,8 +21,12 @@ app.use('/genre', genreRoutes);
 app.use('/transactions', transactionRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'IT Literature Shop API is running' });
+app.get('/health-check', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Hello World!', 
+    date: new Date().toDateString() 
+  });
 });
 
 // Error handling middleware

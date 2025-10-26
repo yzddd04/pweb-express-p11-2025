@@ -98,13 +98,9 @@ router.post('/', authenticateToken, validateTransaction, async (req: any, res) =
       success: true,
       message: 'Transaction created successfully',
       data: {
-        transaction: {
-          id: result.order.id,
-          user_id: result.order.user_id,
-          total_amount: result.totalAmount,
-          created_at: result.order.created_at,
-          items: result.orderItems
-        }
+        transaction_id: result.order.id,
+        total_quantity: items.reduce((sum: number, item: { book_id: string; quantity: number }) => sum + item.quantity, 0),
+        total_price: result.totalAmount
       }
     });
   } catch (error) {
@@ -112,157 +108,6 @@ router.post('/', authenticateToken, validateTransaction, async (req: any, res) =
     res.status(500).json({
       success: false,
       message: 'Failed to create transaction'
-    });
-  }
-});
-
-// GET /transactions - Get All Transactions
-router.get('/', authenticateToken, async (req: any, res) => {
-  try {
-    const userId = req.user.id;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const sort_by = req.query.sort_by as string || 'created_at';
-    const sort_order = req.query.sort_order as string || 'desc';
-
-    const skip = (page - 1) * limit;
-
-    // Build order by clause
-    const orderBy: any = {};
-    orderBy[sort_by] = sort_order;
-
-    // Get transactions with pagination
-    const [transactions, total] = await Promise.all([
-      prisma.orders.findMany({
-        where: { user_id: userId },
-        include: {
-          order_items: {
-            include: {
-              book: {
-                select: {
-                  id: true,
-                  title: true,
-                  price: true,
-                  writer: true
-                }
-              }
-            }
-          }
-        },
-        orderBy,
-        skip,
-        take: limit
-      }),
-      prisma.orders.count({ where: { user_id: userId } })
-    ]);
-
-    // Calculate total amount for each transaction
-    const transactionsWithTotal = transactions.map((transaction: any) => {
-      const totalAmount = transaction.order_items.reduce((sum: number, item: any) => {
-        return sum + (item.book.price * item.quantity);
-      }, 0);
-
-      return {
-        id: transaction.id,
-        user_id: transaction.user_id,
-        total_amount: totalAmount,
-        created_at: transaction.created_at,
-        updated_at: transaction.updated_at,
-        items: transaction.order_items
-      };
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.json({
-      success: true,
-      message: 'Transactions retrieved successfully',
-      data: {
-        transactions: transactionsWithTotal,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
-      }
-    });
-  } catch (error) {
-    console.error('Get transactions error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get transactions'
-    });
-  }
-});
-
-// GET /transactions/:transaction_id - Get Transaction Detail
-router.get('/:transaction_id', authenticateToken, async (req: any, res) => {
-  try {
-    const { transaction_id } = req.params;
-    const userId = req.user.id;
-
-    const transaction = await prisma.orders.findFirst({
-      where: {
-        id: transaction_id,
-        user_id: userId
-      },
-      include: {
-        order_items: {
-          include: {
-            book: {
-              select: {
-                id: true,
-                title: true,
-                writer: true,
-                publisher: true,
-                price: true,
-                genre: {
-                  select: {
-                    id: true,
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-
-    if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: 'Transaction not found'
-      });
-    }
-
-    // Calculate total amount
-    const totalAmount = transaction.order_items.reduce((sum: number, item: any) => {
-      return sum + (item.book.price * item.quantity);
-    }, 0);
-
-    res.json({
-      success: true,
-      message: 'Transaction detail retrieved successfully',
-      data: {
-        transaction: {
-          id: transaction.id,
-          user_id: transaction.user_id,
-          total_amount: totalAmount,
-          created_at: transaction.created_at,
-          updated_at: transaction.updated_at,
-          items: transaction.order_items
-        }
-      }
-    });
-  } catch (error) {
-    console.error('Get transaction detail error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get transaction detail'
     });
   }
 });
@@ -330,16 +175,12 @@ router.get('/statistics', authenticateToken, async (req: any, res) => {
 
     res.json({
       success: true,
-      message: 'Transaction statistics retrieved successfully',
+      message: 'Get transactions statistics successfully',
       data: {
-        statistics: {
-          total_transactions: totalTransactions,
-          total_amount: totalAmount,
-          average_transaction: Math.round(averageTransaction * 100) / 100,
-          genre_with_most_transactions: genreWithMostTransactions,
-          genre_with_least_transactions: genreWithLeastTransactions,
-          genre_breakdown: genreArray.sort((a, b) => b.count - a.count)
-        }
+        total_transactions: totalTransactions,
+        average_transaction_amount: Math.round(averageTransaction * 100) / 100,
+        fewest_book_sales_genre: genreWithLeastTransactions?.name || 'N/A',
+        most_book_sales_genre: genreWithMostTransactions?.name || 'N/A'
       }
     });
   } catch (error) {
@@ -347,6 +188,152 @@ router.get('/statistics', authenticateToken, async (req: any, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to get transaction statistics'
+    });
+  }
+});
+
+// GET /transactions - Get All Transactions
+router.get('/', authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const sort_by = req.query.sort_by as string || 'created_at';
+    const sort_order = req.query.sort_order as string || 'desc';
+
+    const skip = (page - 1) * limit;
+
+    // Build order by clause
+    const orderBy: any = {};
+    orderBy[sort_by] = sort_order;
+
+    // Get transactions with pagination
+    const [transactions, total] = await Promise.all([
+      prisma.orders.findMany({
+        where: { user_id: userId },
+        include: {
+          order_items: {
+            include: {
+              book: {
+                select: {
+                  id: true,
+                  title: true,
+                  price: true,
+                  writer: true
+                }
+              }
+            }
+          }
+        },
+        orderBy,
+        skip,
+        take: limit
+      }),
+      prisma.orders.count({ where: { user_id: userId } })
+    ]);
+
+    // Calculate total amount for each transaction
+    const transactionsWithTotal = transactions.map((transaction: any) => {
+      const totalAmount = transaction.order_items.reduce((sum: number, item: any) => {
+        return sum + (item.book.price * item.quantity);
+      }, 0);
+
+      return {
+        id: transaction.id,
+        user_id: transaction.user_id,
+        total_amount: totalAmount,
+        created_at: transaction.created_at,
+        updated_at: transaction.updated_at,
+        items: transaction.order_items
+      };
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      success: true,
+      message: 'Get all transaction successfully',
+      data: transactionsWithTotal.map(transaction => ({
+        id: transaction.id,
+        total_quantity: transaction.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+        total_price: transaction.total_amount
+      }))
+    });
+  } catch (error) {
+    console.error('Get transactions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get transactions'
+    });
+  }
+});
+
+// GET /transactions/:transaction_id - Get Transaction Detail
+router.get('/:transaction_id', authenticateToken, async (req: any, res) => {
+  try {
+    const { transaction_id } = req.params;
+    const userId = req.user.id;
+
+    const transaction = await prisma.orders.findFirst({
+      where: {
+        id: transaction_id,
+        user_id: userId
+      },
+      include: {
+        order_items: {
+          include: {
+            book: {
+              select: {
+                id: true,
+                title: true,
+                writer: true,
+                publisher: true,
+                price: true,
+                genre: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+
+    // Calculate total amount
+    const totalAmount = transaction.order_items.reduce((sum: number, item: any) => {
+      return sum + (item.book.price * item.quantity);
+    }, 0);
+
+    res.json({
+      success: true,
+      message: 'Get transaction detail successfully',
+      data: {
+        id: transaction.id,
+        items: transaction.order_items.map((item: any) => ({
+          book_id: item.book.id,
+          book_title: item.book.title,
+          quantity: item.quantity,
+          subtotal_price: item.book.price * item.quantity
+        })),
+        total_quantity: transaction.order_items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+        total_price: totalAmount
+      }
+    });
+  } catch (error) {
+    console.error('Get transaction detail error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get transaction detail'
     });
   }
 });

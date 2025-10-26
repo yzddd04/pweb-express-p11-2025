@@ -30,7 +30,11 @@ router.post('/', authenticateToken, validateGenre, async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Genre created successfully',
-      data: { genre }
+      data: {
+        id: genre.id,
+        name: genre.name,
+        created_at: genre.created_at
+      }
     });
   } catch (error) {
     console.error('Create genre error:', error);
@@ -91,17 +95,16 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Genres retrieved successfully',
-      data: {
-        genres,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
+      message: 'Get all genre successfully',
+      data: genres.map(genre => ({
+        id: genre.id,
+        name: genre.name
+      })),
+      meta: {
+        page,
+        limit,
+        prev_page: page > 1 ? page - 1 : null,
+        next_page: page < totalPages ? page + 1 : null
       }
     });
   } catch (error) {
@@ -145,8 +148,11 @@ router.get('/:genre_id', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Genre detail retrieved successfully',
-      data: { genre }
+      message: 'Get genre detail successfully',
+      data: {
+        id: genre.id,
+        name: genre.name
+      }
     });
   } catch (error) {
     console.error('Get genre detail error:', error);
@@ -212,7 +218,11 @@ router.patch('/:genre_id', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       message: 'Genre updated successfully',
-      data: { genre }
+      data: {
+        id: genre.id,
+        name: genre.name,
+        updated_at: genre.updated_at
+      }
     });
   } catch (error) {
     console.error('Update genre error:', error);
@@ -270,7 +280,7 @@ router.delete('/:genre_id', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Genre deleted successfully'
+      message: 'Genre removed successfully'
     });
   } catch (error) {
     console.error('Delete genre error:', error);
